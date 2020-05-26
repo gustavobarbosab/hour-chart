@@ -32,13 +32,15 @@ class HourChartView @JvmOverloads constructor(
     private val missingHours
         get() = totalHours - workedHours
 
-    var strokeWidth = STROKE_WIDTH_DEFAULT
+    private var textLegendSize = TEXT_SIZE_DEFAULT
+    private var circleLegendSize = LEGEND_DOT_SIZE
+    private var strokeWidth = STROKE_WIDTH_DEFAULT
         set(value) {
             field = value
             workedPaint.strokeWidth = strokeWidthPx
             missingPaint.strokeWidth = strokeWidthPx
-            invalidate()
         }
+
     private val strokeWidthPx
         get() = toPx(strokeWidth)
 
@@ -71,7 +73,6 @@ class HourChartView @JvmOverloads constructor(
         }
         textPaint.apply {
             color = Color.DKGRAY
-            textSize = toPx(TEXT_SIZE_DEFAULT)
             textAlign = Paint.Align.CENTER
         }
         circleLegendPaint.style = Paint.Style.FILL
@@ -86,7 +87,6 @@ class HourChartView @JvmOverloads constructor(
             workedHours,
             super.onSaveInstanceState()
         )
-
 
     override fun onRestoreInstanceState(state: Parcelable?) {
         var superState: Parcelable? = state
@@ -123,12 +123,14 @@ class HourChartView @JvmOverloads constructor(
         val centerX = chartRect.centerX()
         val centerY = chartRect.centerY()
 
-        val textSize = toPx(TEXT_SIZE_DEFAULT)
+        val textSize = toPx(textLegendSize)
+        textPaint.textSize = textSize
         val halfTextSize = textSize / 2
 
         val workedY = centerY - halfTextSize
         val missingY = centerY + textSize
         val marginEndCircleToText = toPx(4f)
+        val circleSize = toPx(circleLegendSize)
 
         // Draw worked legend
         val workedString = "+${workedHours}h"
@@ -141,9 +143,9 @@ class HourChartView @JvmOverloads constructor(
         textPaint.getTextBounds(workedString, 0, workedString.length, textBounds)
         circleLegendPaint.color = workedColorResource
         canvas.drawCircle(
-            centerX - ((textBounds.width() / 2) + halfTextSize + marginEndCircleToText),
+            centerX - ((textBounds.width() / 2) + circleSize + marginEndCircleToText),
             workedY + textBounds.exactCenterY(),
-            halfTextSize,
+            circleSize,
             circleLegendPaint
         )
 
@@ -153,9 +155,9 @@ class HourChartView @JvmOverloads constructor(
         textPaint.getTextBounds(missingString, 0, missingString.length, textBounds)
         circleLegendPaint.color = missingColorResource
         canvas.drawCircle(
-            centerX - ((textBounds.width() / 2) + halfTextSize + marginEndCircleToText),
+            centerX - ((textBounds.width() / 2) + circleSize + marginEndCircleToText),
             missingY + textBounds.exactCenterY(),
-            halfTextSize,
+            circleSize,
             circleLegendPaint
         )
     }
@@ -169,6 +171,11 @@ class HourChartView @JvmOverloads constructor(
         val endChart = w.toFloat() - (paddingEnd + PADDING_DEFAULT)
         val bottomChart = h.toFloat() - (paddingBottom + PADDING_DEFAULT)
         chartRect.set(startChart, topChart, endChart, bottomChart)
+
+        // Calculate chart sizes
+        textLegendSize = (w * 0.04).toFloat()
+        circleLegendSize = (w * 0.01).toFloat()
+        strokeWidth = (w * 0.04).toFloat()
     }
 
     fun setWorkedHours(workedHours: Int) {
@@ -215,7 +222,8 @@ class HourChartView @JvmOverloads constructor(
     companion object {
         const val TOTAL_HOURS_DEFAULT = 200
         const val PADDING_DEFAULT = 60F
-        const val STROKE_WIDTH_DEFAULT = 22F
+        const val STROKE_WIDTH_DEFAULT = 18F
         const val TEXT_SIZE_DEFAULT = 16F
+        const val LEGEND_DOT_SIZE = 6F
     }
 }
