@@ -32,7 +32,9 @@ class HourChartView @JvmOverloads constructor(
     private val missingHours
         get() = totalHours - workedHours
 
-    private var textLegendSize = TEXT_SIZE_DEFAULT
+    private var textLegendSize = MIN_TEXT_SIZE
+    val textSizePx
+        get() = if (textLegendSize >= MIN_TEXT_SIZE) toPx(textLegendSize) else toPx(MIN_TEXT_SIZE)
     private var circleLegendSize = LEGEND_DOT_SIZE
     private var strokeWidth = STROKE_WIDTH_DEFAULT
         set(value) {
@@ -123,12 +125,11 @@ class HourChartView @JvmOverloads constructor(
         val centerX = chartRect.centerX()
         val centerY = chartRect.centerY()
 
-        val textSize = toPx(textLegendSize)
-        textPaint.textSize = textSize
-        val halfTextSize = textSize / 2
+        textPaint.textSize = textSizePx
+        val halfTextSize = textSizePx / 2
 
         val workedY = centerY - halfTextSize
-        val missingY = centerY + textSize
+        val missingY = centerY + textSizePx
         val marginEndCircleToText = toPx(4f)
         val circleSize = toPx(circleLegendSize)
 
@@ -166,16 +167,17 @@ class HourChartView @JvmOverloads constructor(
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         super.onSizeChanged(w, h, oldw, oldh)
-        val startChart = paddingStart + PADDING_DEFAULT
-        val topChart = paddingTop + PADDING_DEFAULT
-        val endChart = w.toFloat() - (paddingEnd + PADDING_DEFAULT)
-        val bottomChart = h.toFloat() - (paddingBottom + PADDING_DEFAULT)
+        val paddingPx = toPx(PADDING_DEFAULT)
+        val startChart = paddingStart + paddingPx
+        val topChart = paddingTop + paddingPx
+        val endChart = w.toFloat() - (paddingEnd + paddingPx)
+        val bottomChart = h.toFloat() - (paddingBottom + paddingPx)
         chartRect.set(startChart, topChart, endChart, bottomChart)
 
         // Calculate chart sizes
-        textLegendSize = (w * 0.04).toFloat()
-        circleLegendSize = (w * 0.01).toFloat()
-        strokeWidth = (w * 0.04).toFloat()
+        textLegendSize = (chartRect.height() * 0.04).toFloat()
+        circleLegendSize = (chartRect.height() * 0.01).toFloat()
+        strokeWidth = (chartRect.height() * 0.04).toFloat()
     }
 
     fun setWorkedHours(workedHours: Int) {
@@ -207,8 +209,6 @@ class HourChartView @JvmOverloads constructor(
 
     private fun toPx(dp: Float) = dp * context.resources.displayMetrics.density
 
-    private fun toDp(px: Float) = px / context.resources.displayMetrics.density
-
     @Parcelize
     data class ViewState(
         val strokeWidth: Float,
@@ -221,9 +221,9 @@ class HourChartView @JvmOverloads constructor(
 
     companion object {
         const val TOTAL_HOURS_DEFAULT = 200
-        const val PADDING_DEFAULT = 60F
+        const val PADDING_DEFAULT = 18F
         const val STROKE_WIDTH_DEFAULT = 18F
-        const val TEXT_SIZE_DEFAULT = 16F
         const val LEGEND_DOT_SIZE = 6F
+        const val MIN_TEXT_SIZE = 12F
     }
 }
