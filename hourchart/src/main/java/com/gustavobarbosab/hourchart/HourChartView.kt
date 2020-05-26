@@ -1,5 +1,6 @@
 package com.gustavobarbosab.hourchart
 
+import android.animation.ObjectAnimator
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
@@ -9,6 +10,7 @@ import android.graphics.RectF
 import android.os.Parcelable
 import android.util.AttributeSet
 import android.view.View
+import android.view.animation.AccelerateDecelerateInterpolator
 import kotlinx.android.parcel.Parcelize
 
 class HourChartView @JvmOverloads constructor(
@@ -169,11 +171,31 @@ class HourChartView @JvmOverloads constructor(
         chartRect.set(startChart, topChart, endChart, bottomChart)
     }
 
-    fun setup(workedHours: Int, totalHours: Int = TOTAL_HOURS_DEFAULT) {
-        if (workedHours > totalHours) throw IllegalArgumentException()
-        this.totalHours = totalHours
+    fun setWorkedHours(workedHours: Int) {
+        if (workedHours > totalHours) {
+            throw IllegalArgumentException()
+        }
         this.workedHours = workedHours
         invalidate()
+    }
+
+    fun setTotalHours(totalHours: Int) {
+        if (workedHours > totalHours) {
+            throw IllegalArgumentException()
+        }
+        this.totalHours = totalHours
+        invalidate()
+    }
+
+    fun setWorkedHoursAnimated(workedHours: Int, durationAnimation: Long = 3000) {
+        ObjectAnimator.ofInt(1, workedHours).apply {
+            duration = durationAnimation
+            addUpdateListener { anim ->
+                setWorkedHours((anim.animatedValue as Int))
+            }
+            interpolator = AccelerateDecelerateInterpolator()
+            start()
+        }
     }
 
     private fun toPx(dp: Float) = dp * context.resources.displayMetrics.density

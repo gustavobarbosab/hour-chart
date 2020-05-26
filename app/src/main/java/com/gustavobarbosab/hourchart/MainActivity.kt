@@ -14,11 +14,11 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        hourChart.setup(20)
+        hourChart.setWorkedHoursAnimated(120)
         btChangeChart.setOnClickListener {
             hourChart.workedColorResource = randomColor()
             hourChart.missingColorResource = randomColor()
-            hourChart.setup(rnd.nextInt(199))
+            hourChart.setWorkedHoursAnimated(rnd.nextInt(199))
         }
     }
 
